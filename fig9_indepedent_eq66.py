@@ -3,7 +3,6 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
-
 C_LIGHT = 2.99792458e10
 K_B = 1.380649e-16
 M_P = 1.67262192369e-24
@@ -37,10 +36,8 @@ def load_hyrec(path, z_min=200.0, z_max=2.0e4):
     order = np.argsort(z)
     return z[order], xe[order], tgas[order]
 
-
 def vbc_rms(z):
     return np.minimum(1.0, z / 1.0e3) * 30.0e5
-
 
 def velocity_grid(n=500, xmax=5.0):
     x = np.linspace(0.0, xmax, n)
@@ -48,7 +45,6 @@ def velocity_grid(n=500, xmax=5.0):
     weight /= np.trapezoid(weight, x)
 
     return x, weight
-
 
 def teff_from_velocity(tgas, xe, vrel):
     return tgas + (M_P / K_B) * vrel**2 / (1.0 + xe)
@@ -65,7 +61,6 @@ def beta_pbh(mass, z, xe, teff):
 
     return 5.60e-24 * xe * tb / a**4
 
-
 def gamma_pbh(mass, z, xe, teff):
     return (
         2.0
@@ -73,7 +68,6 @@ def gamma_pbh(mass, z, xe, teff):
         / (1.0 + xe)
         * beta_pbh(mass, z, xe, teff)
     )
-
 
 def lambda_pbh(mass, z, xe, teff):
     beta = beta_pbh(mass, z, xe, teff)
@@ -93,7 +87,6 @@ def lambda_pbh(mass, z, xe, teff):
 
     return lam_drag * lam_nodrag / lam_iso
 
-
 def mdot_pbh(mass, z, xe, teff):
     vb = bondi_speed(xe, teff)
 
@@ -103,7 +96,6 @@ def mdot_pbh(mass, z, xe, teff):
         * ((1.0 + z) / vb) ** 3
         * lambda_pbh(mass, z, xe, teff)
     )
-
 
 def ts_over_me(mass, z, xe, teff, branch):
     gamma = gamma_pbh(mass, z, xe, teff)
@@ -159,7 +151,6 @@ def free_free_j(x):
 
     return result
 
-
 def luminosity(mass, z, xe, teff, branch):
     mdot = mdot_pbh(mass, z, xe, teff)
     mdot_dimensionless = mdot / (1.4e17 * mass)
@@ -189,7 +180,6 @@ def feedback_ratio(mass, z, xe, teff, branch):
         * (M_P * C_LIGHT**2) / (K_B * tcmb)
         * np.sqrt(1.0 + gamma ** (2.0 / 3.0))
     )
-
 
 def average_feedback(mass, z, xe, tgas, branch):
     x, weight = velocity_grid()
