@@ -3,7 +3,6 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
-
 C_LIGHT = 2.99792458e10
 K_B = 1.380649e-16
 M_P = 1.67262192369e-24
@@ -63,7 +62,7 @@ def beta_pbh(mass, z, xe, teff):
     vb = bondi_speed(xe, teff)
     tb = 1.33e26 * mass / vb**3
 
-    return 5.60e-24 * xe * tb / a**4
+    return 7.45e-24 * xe * tb / a**4
 
 
 def gamma_pbh(mass, z, xe, teff):
@@ -98,7 +97,7 @@ def mdot_pbh(mass, z, xe, teff):
     vb = bondi_speed(xe, teff)
 
     return (
-        8.81e22
+        9.15e22
         * mass**2
         * ((1.0 + z) / vb) ** 3
         * lambda_pbh(mass, z, xe, teff)
@@ -371,7 +370,6 @@ def main():
     )
 
     plt.show()
-
 
 if __name__ == "__main__":
     main()
