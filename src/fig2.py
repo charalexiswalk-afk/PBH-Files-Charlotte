@@ -1,9 +1,9 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
-data = np.loadtxt(
-    r"C:\Users\chara\OneDrive\python\HYREC-2-master\HYREC-2-master\output_xe.dat"
-)
+DATA_FILE = Path(__file__).resolve().parent.parent / "data" / "output_xe.dat"
+
+data = np.loadtxt(DATA_FILE)
 
 z = data[:,0]
 xe = data[:,1]
