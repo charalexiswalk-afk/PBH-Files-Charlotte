@@ -11,7 +11,7 @@ from matplotlib.ticker import LogFormatterMathtext, LogLocator
 ZIP_PATH = Path(__file__).resolve().parent / "HyRec_2017.zip"
 PREFIX = "HyRec_2017/"
 
-
+# Read numerical tables from the ZIP archive
 def load_dat_from_zip(zip_path: Path, member: str) -> np.ndarray:
     """Read a whitespace-delimited data file from the HyRec archive."""
     with zipfile.ZipFile(zip_path, "r") as archive:
@@ -46,7 +46,7 @@ v_effective = velocity_data[:, 3]
 Tgas = (v_thermal / 9.09e3) ** 2 / (1.0 + xe)
 Teff_original = (v_effective / 9.09e3) ** 2 / (1.0 + xe)
 
-
+# Direct translations of the PBH functions in energy_injection.c
 def beta_pbh(M, z, xe, Teff):
     """Dimensionless Compton-drag parameter."""
     a = 1.0 / (1.0 + z)
@@ -184,7 +184,7 @@ def original_feedback(
         * (1.0 + gamma ** (1.0 / 3.0))
     )
 
-
+# Zero-relative-velocity diagnostic
 def zero_velocity_feedback(M, z, xe, Tgas, collisional):
     """Evaluate the same prescription at v_rel = 0."""
     luminosity_ratio = (
