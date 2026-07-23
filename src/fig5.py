@@ -1,10 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Thu May 28 16:19:45 2026
-
-@author: chara
-"""
-
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
