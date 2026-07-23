@@ -3,7 +3,6 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
-
 C_LIGHT = 2.99792458e10
 K_B = 1.380649e-16
 M_P = 1.67262192369e-24
@@ -371,7 +370,6 @@ def main():
     )
 
     plt.show()
-
 
 if __name__ == "__main__":
     main()
