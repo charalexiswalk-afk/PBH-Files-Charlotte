@@ -27,11 +27,6 @@ M_sun = 1.98847e30
 a_rad = 7.5657e-16
 T0 = 2.7255
 
-# PBH masses shown in the paper
-masses = [1, 1e2, 1e4]
-labels = [r"$1\,M_\odot$", r"$10^2\,M_\odot$", r"$10^4\,M_\odot$"]
-colors = ["red", "purple", "blue"]
-
 # effective velocity averaged over the relative-velocity distribution
 def veff_calc(vB, vL):
     y = np.linspace(0, 8, 2000)
