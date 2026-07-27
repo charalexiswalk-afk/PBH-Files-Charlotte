@@ -12,18 +12,20 @@ def load_dat_from_zip(zip_path: Path, member: str) -> np.ndarray:
     with zipfile.ZipFile(zip_path, "r") as archive:
         return np.loadtxt(io.BytesIO(archive.read(member)))
 
-# Load data files
+# load HyRec data
 feedback_data = load_dat_from_zip(ZIP_PATH, PREFIX + "T_feedback.dat")
 luminosity_data = load_dat_from_zip(ZIP_PATH, PREFIX + "L_pbh.dat")
 beta_data = load_dat_from_zip(ZIP_PATH, PREFIX + "beta_pbh.dat")
 gamma_data = load_dat_from_zip(ZIP_PATH, PREFIX + "gamma_pbh.dat")
 velocity_data = load_dat_from_zip(ZIP_PATH, PREFIX + "velocities.dat")
 
+# load HyRec data
 z = feedback_data[:, 0]
 xe = np.clip(3670.0 * beta_data[:, 1] / gamma_data[:, 1] - 1.0, 0.0, 1.0)
 Tgas = (velocity_data[:, 2] / 9.09e3) ** 2 / (1.0 + xe)
 Teff_original = (velocity_data[:, 3] / 9.09e3) ** 2 / (1.0 + xe)
 
+# accretion and luminosity functions
 def beta_pbh(M, z, xe, Teff):
     return 7.45e-24 * xe * (1.33e26 * M / (9.09e3 * np.sqrt((1.0 + xe) * Teff))**3) * (1.0 + z)**4
 
@@ -60,6 +62,7 @@ def L_pbh(M, z, xe, Teff, collisional):
 
 def L_Edd(M): return 1.26e38 * M
 
+# Figure 9 feedback ratio
 def c_code_prefactor(xe, Teff):
     return (np.sqrt(Teff / 1.21e-8) / 3.0e10) * 0.067 * (xe / (1.0 + xe)) * (1.1e13 / Teff)
 
@@ -73,7 +76,9 @@ column_map = {(1.0, True): 1, (1.0, False): 2, (1.0e2, True): 3, (1.0e2, False):
 mass_colors = {1.0: "#d62728", 1.0e2: "#5b1a69", 1.0e4: "#1f3fd4"}
 mass_labels = {1.0: r"$1\,M_\odot$", 1.0e2: r"$10^2\,M_\odot$", 1.0e4: r"$10^4\,M_\odot$"}
 
+# check reconstruction against the original data
 print("\nRECONSTRUCTION CHECK AGAINST T_feedback.dat")
+
 for M in masses:
     for collisional in (True, False):
         col = column_map[(M, collisional)]
@@ -83,6 +88,7 @@ for M in masses:
         branch = "collisional" if collisional else "photoionization"
         print(f"M={M:g} M_sun, {branch:16s}: max relative diff = {rel_err:.3e}")
 
+# compare the published result with v_rel = 0
 fig, ax = plt.subplots(figsize=(8.2, 5.9))
 
 for M in masses:
@@ -101,6 +107,7 @@ ax.set(xlim=(3.0e2, 2.0e4), ylim=(1.0e-8, 1.0e2), xlabel=r"$z$",
        title=r"Figure 9 reconstruction and comparison with $v_{\rm rel}=0$")
 ax.grid(True, which="both", alpha=0.20)
 
+# legends
 mass_handles = [Line2D([0], [0], color=mass_colors[M], lw=2.5, label=mass_labels[M]) for M in masses]
 style_handles = [
     Line2D([0], [0], color="black", ls="-", lw=2.2, label="Published, collisional"),
