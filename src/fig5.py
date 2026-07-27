@@ -1,21 +1,23 @@
+from pathlib import Path
 import numpy as np
 import matplotlib.pyplot as plt
 from matplotlib.lines import Line2D
 
-DATA_FILE = Path(__file__).resolve().parent.parent / "data" / "output_xe.dat"
-
+# load HyRec recombination history
+DATA_FILE = Path(__file__).resolve().parent.parent / "data/output_xe.dat"
 data = np.loadtxt(DATA_FILE)
 
 z = data[:,0]
 xe = data[:,1]
 Tm = data[:,2]
 
+# restrict to the redshift range used in the figure
 mask = (z >= 100) & (z <= 8000)
-
 z = z[mask]
 xe = xe[mask]
 Tm = Tm[mask]
 
+# physical constants
 G = 6.67430e-11
 c = 2.99792458e8
 sigma_T = 6.6524587321e-29
