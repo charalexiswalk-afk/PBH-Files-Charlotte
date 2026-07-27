@@ -62,7 +62,7 @@ def L_pbh(M, z, xe, Teff, collisional):
 
 def L_Edd(M): return 1.26e38 * M
 
-# Figure 9 feedback ratio
+# figure 9 feedback ratio
 def c_code_prefactor(xe, Teff):
     return (np.sqrt(Teff / 1.21e-8) / 3.0e10) * 0.067 * (xe / (1.0 + xe)) * (1.1e13 / Teff)
 
