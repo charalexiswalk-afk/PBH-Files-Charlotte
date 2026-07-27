@@ -9,12 +9,10 @@ from matplotlib.lines import Line2D
 ZIP_PATH = Path(__file__).resolve().parent / "HyRec_2017.zip"
 PREFIX = "HyRec_2017/"
 
-
 def load_dat_from_zip(zip_path: Path, member: str) -> np.ndarray:
     """Read a whitespace-delimited data file from the HyRec archive."""
     with zipfile.ZipFile(zip_path, "r") as archive:
         return np.loadtxt(io.BytesIO(archive.read(member)))
-
 
 feedback_data = load_dat_from_zip(
     ZIP_PATH, PREFIX + "T_feedback.dat"
@@ -44,14 +42,12 @@ v_effective = velocity_data[:, 3]
 Tgas = (v_thermal / 9.09e3) ** 2 / (1.0 + xe)
 Teff_original = (v_effective / 9.09e3) ** 2 / (1.0 + xe)
 
-
 def beta_pbh(M, z, xe, Teff):
     """Dimensionless Compton-drag parameter."""
     a = 1.0 / (1.0 + z)
     vB = 9.09e3 * np.sqrt((1.0 + xe) * Teff)
     tB = 1.33e26 * M / vB**3
     return 7.45e-24 * xe * tB / a**4
-
 
 def gamma_pbh(M, z, xe, Teff):
     """Dimensionless Compton-cooling parameter."""
@@ -60,7 +56,6 @@ def gamma_pbh(M, z, xe, Teff):
         / (1.0 + xe)
         * beta_pbh(M, z, xe, Teff)
     )
-
 
 def lambda_pbh(M, z, xe, Teff):
     """Dimensionless accretion eigenvalue."""
@@ -81,7 +76,6 @@ def lambda_pbh(M, z, xe, Teff):
 
     return lam_ricotti * lam_nodrag / lam_iso
 
-
 def Mdot_pbh(M, z, xe, Teff):
     """Mass-accretion rate in g/s."""
     vB = 9.09e3 * np.sqrt((1.0 + xe) * Teff)
@@ -92,7 +86,6 @@ def Mdot_pbh(M, z, xe, Teff):
         * ((1.0 + z) / vB) ** 3
         * lambda_pbh(M, z, xe, Teff)
     )
-
 
 def TS_over_me_pbh(M, z, xe, Teff, collisional):
     """Inner-flow temperature divided by m_e c^2."""
@@ -110,7 +103,6 @@ def TS_over_me_pbh(M, z, xe, Teff, collisional):
         YS *= ((1.0 + xe) / 2.0) ** 8
 
     return YS / (1.0 + YS / 0.27) ** (1.0 / 3.0)
-
 
 def eps_over_mdot_pbh(M, z, xe, Teff, collisional):
     """Radiative efficiency divided by dimensionless accretion rate."""
@@ -135,7 +127,6 @@ def eps_over_mdot_pbh(M, z, xe, Teff, collisional):
 
     return X / 1836.0 / 137.0 * Gff
 
-
 def L_pbh(M, z, xe, Teff, collisional):
     """PBH luminosity in erg/s."""
     Mdot = Mdot_pbh(M, z, xe, Teff)
@@ -150,11 +141,9 @@ def L_pbh(M, z, xe, Teff, collisional):
 
     return efficiency * Mdot * 9.0e20
 
-
 def L_Edd(M):
     """Eddington luminosity in erg/s."""
     return 1.26e38 * M
-
 
 def c_code_prefactor(xe, Teff):
     """Numerical prefactor used in plots_pbhs.c."""
@@ -164,7 +153,6 @@ def c_code_prefactor(xe, Teff):
         * xe / (1.0 + xe)
         * 1.1e13 / Teff
     )
-
 
 def original_feedback(
     M,
@@ -182,7 +170,6 @@ def original_feedback(
         * (1.0 + gamma ** (1.0 / 3.0))
     )
 
-
 def zero_velocity_feedback(M, z, xe, Tgas, collisional):
     """Evaluate the same prescription at v_rel = 0."""
     luminosity_ratio = (
@@ -197,7 +184,6 @@ def zero_velocity_feedback(M, z, xe, Tgas, collisional):
         * c_code_prefactor(xe, Tgas)
         * (1.0 + gamma ** (1.0 / 3.0))
     )
-
 
 masses = [1.0, 1.0e2, 1.0e4]
 
@@ -242,7 +228,6 @@ for M in masses:
             f"maximum relative difference = "
             f"{relative_error:.3e}"
         )
-
 
 mass_colors = {
     1.0: "#d62728",
