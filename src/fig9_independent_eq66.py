@@ -2,13 +2,14 @@ from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
 
-# Physical Constants (CGS)
+# physical constants 
 C_LIGHT = 2.99792458e10
 K_B = 1.380649e-16
 M_P = 1.67262192369e-24
 MP_OVER_ME = 1836.0
 T0 = 2.7255
 
+# load the HyRec recombination history
 HYREC_OUTPUT = Path(__file__).resolve().parent / "HYREC-2-master/HYREC-2-master/output_xe.dat"
 
 def load_hyrec(path, z_min=200.0, z_max=2.0e4):
@@ -32,6 +33,7 @@ def teff_from_velocity(tgas, xe, vrel):
 def bondi_speed(xe, teff):
     return 9.09e3 * np.sqrt((1.0 + xe) * teff)
 
+# bondi accretion model
 def beta_pbh(mass, z, xe, teff):
     vb = bondi_speed(xe, teff)
     return 7.45e-24 * xe * (1.33e26 * mass / vb**3) / (1.0 / (1.0 + z))**4
@@ -83,6 +85,7 @@ def luminosity(mass, z, xe, teff, branch):
 def l_edd(mass):
     return 1.4e17 * mass * 9.0e20
 
+# thermal-feedback ratio (eq. 66)
 def feedback_ratio(mass, z, xe, teff, branch):
     vb = bondi_speed(xe, teff)
     gamma = gamma_pbh(mass, z, xe, teff)
@@ -91,6 +94,7 @@ def feedback_ratio(mass, z, xe, teff, branch):
     return (0.07 * (xe / (1.0 + xe)) * (lum / l_edd(mass)) * (vb / C_LIGHT) 
             * (M_P * C_LIGHT**2 / (K_B * tcmb)) * np.sqrt(1.0 + gamma**(2.0 / 3.0)))
 
+# average over the PBH velocity distribution
 def average_feedback(mass, z, xe, tgas, branch):
     x, weight = velocity_grid()
     vrel = x[:, None] * vbc_rms(z)[None, :]
@@ -98,6 +102,7 @@ def average_feedback(mass, z, xe, tgas, branch):
     feedback = feedback_ratio(mass, z[None, :], xe[None, :], teff, branch)
     return np.trapezoid(weight[:, None] * feedback, x, axis=0)
 
+# plot figure 9
 def main():
     z, xe, tgas = load_hyrec(HYREC_OUTPUT)
     masses, colors = [1.0, 1.0e2, 1.0e4], ["red", "purple", "blue"]
@@ -113,7 +118,7 @@ def main():
         ax.loglog(z, coll, color=color, lw=2.3, ls="-", label=label)
         ax.loglog(z, photo, color=color, lw=2.3, ls="--")
 
-    # Plot formatting
+ # figure formatting
     all_vals = np.concatenate(plotted_values)
     pos_vals = all_vals[np.isfinite(all_vals) & (all_vals > 0.0)]
     
@@ -126,7 +131,7 @@ def main():
     ax.grid(True, which="minor", lw=0.4, alpha=0.12)
     ax.tick_params(which="both", direction="in", top=True, right=True)
 
-    # Legends
+# legend
     mass_legend = ax.legend(title="PBH mass", loc="lower right", frameon=False, fontsize=9)
     ax.add_artist(mass_legend)
     
