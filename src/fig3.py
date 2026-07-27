@@ -1,15 +1,18 @@
 import numpy as np
 import matplotlib.pyplot as plt
 
+# adiabatic and isothermal limits
 lambda_ad = 0.25 * (3.0 / 5.0)**1.5
 lambda_iso = 0.25 * np.exp(1.5)
 
+# analytic interpolation from eq. 31
 gamma = np.logspace(-3, 3, 500)
 
 lam = lambda_ad + (lambda_iso - lambda_ad) * ((gamma**2) / (88.0 + gamma**2))**0.22
 
 plt.figure(figsize=(6, 4.5))
 
+# figure formatting
 plt.semilogx(gamma, lam, color="purple", linewidth=2.2, label="Analytic fit")
 plt.axhline(lambda_ad, color="black", linestyle=":", linewidth=1.5)
 plt.axhline(lambda_iso, color="black", linestyle=":", linewidth=1.5)
