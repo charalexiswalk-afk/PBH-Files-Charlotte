@@ -1,8 +1,9 @@
 """
 Author: Charlotte Walker
 
-Description: This script reconstructs the thermal-feedback curves stored for Figure 9 of Ali-Haïmoud & Kamionkowski (2017) and compares them 
-with the limiting case of zero relative velocity between the PBH and surrounding gas.
+Description: 
+This script reconstructs the thermal-feedback curves stored for Figure 9 of Ali-Haïmoud & Kamionkowski (2017) and compares them with the 
+limiting case of zero relative velocity between the PBH and surrounding gas.
 
 The published curves are reconstructed using the tabulated HyRec luminosities, effective temperatures, and the factor 1 + gamma^(1/3) used in 
 the original numerical implementation. The zero-velocity curves are then calculated by setting the effective gas temperature equal to T_gas and 
