@@ -1,3 +1,17 @@
+"""
+Author: Charlotte Walker
+
+Description:
+This script implements the Figure 9 thermal-feedback quantity from Ali-Haïmoud & Kamionkowski (2017) using the HyRec recombination history. The
+PBH accretion rate, inner-flow temperature, radiative efficiency, luminosity, and Eq. (66) feedback ratio are calculated directly for the collisional 
+and photoionization limits.
+
+The calculation samples the relative PBH-gas velocity distribution, evaluates the corresponding effective gas temperature and feedback ratio at each
+velocity, and averages the final quantity over the distribution. The factor sqrt(1 + gamma^(2/3)) is used as written in Eq. (66).
+
+No tabulated Figure 9 luminosity or feedback curves are used.
+"""
+
 from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
