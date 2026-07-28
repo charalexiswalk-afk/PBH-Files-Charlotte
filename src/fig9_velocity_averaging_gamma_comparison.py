@@ -2,14 +2,14 @@
 Author: Charlotte Walker
 
 Description:
-Reconstructs the Figure 9 thermal-feedback calculation from Ali-Haïmoud & Kamionkowski (2017). The luminosity is averaged over the 
+This script reconstructs the Figure 9 thermal-feedback calculation from Ali-Haïmoud & Kamionkowski (2017). The luminosity is averaged over the 
 distribution of relative baryon-dark matter velocities and combined with the thermal-feedback prescription used throughout the paper.
 
 Equation (66) contains the factor sqrt(1 + gamma^(2/3)), whereas the original HyRec implementation evaluates the corresponding quantity
 using 1 + gamma^(1/3).
 
 The original HyRec implementation replaces the Eq. (66) expression with the interpolation 1 + gamma^(1/3), which has the same limiting 
-behaviour for small and large gamma. This script compares the two prescriptions while keeping every other part of the calculation unchanged 
+behaviour for small and large gamma. We compare the two prescriptions while keeping every other part of the calculation unchanged 
 in order to isolate the effect of this approximation on the reconstructed Figure 9 curves.
 """
 
