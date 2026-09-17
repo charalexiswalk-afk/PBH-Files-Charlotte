@@ -15,7 +15,6 @@ prefactor is still the one used in the numerical source.
 
 """
 
-import io, zipfile
 from pathlib import Path
 import matplotlib.pyplot as plt
 import numpy as np
