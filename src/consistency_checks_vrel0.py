@@ -1,9 +1,11 @@
 """
+Author: Charlotte Walker
+
+Description:
 Zero-relative-velocity consistency checks for YAH (2017).
 
-Loads the original and v_rel = 0 HyRec outputs, makes the six figures used in
-the consistency-check note, and compares the 2017 local-feedback source
-prescription with the printed Eq. (66).
+Loads the original and v_rel = 0 HyRec outputs, makes the six figures used in the consistency-check note, 
+and compares the 2017 local-feedback source prescription with the printed Eq. (66).
 """
 
 from pathlib import Path
