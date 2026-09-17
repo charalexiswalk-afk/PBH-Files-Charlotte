@@ -2,14 +2,16 @@
 Author: Charlotte Walker
 
 Description:
-This script implements the Figure 9 thermal-feedback quantity from Ali-Haïmoud & Kamionkowski (2017) using the HyRec recombination history. The
-PBH accretion rate, inner-flow temperature, radiative efficiency, luminosity, and Eq. (66) feedback ratio are calculated directly for the collisional 
-and photoionization limits.
+This script independently evaluates the printed Eq. (66) of Ali-Haïmoud & Kamionkowski (2017) over the distribution of relative PBH-gas velocities.
 
-The calculation samples the relative PBH-gas velocity distribution, evaluates the corresponding effective gas temperature and feedback ratio at each
-velocity, and averages the final quantity over the distribution. The factor sqrt(1 + gamma^(2/3)) is used as written in Eq. (66).
+For each relative velocity, the accretion rate, inner-flow temperature, radiative efficiency, luminosity, and thermal-feedback ratio are recalculated.
 
-No tabulated Figure 9 luminosity or feedback curves are used.
+The printed factor sqrt(1 + gamma^(2/3)) is used directly.
+
+The final Eq. (66) feedback quantity is then averaged over the velocity distribution. This differs from the numerical prescription used to generate
+Figure 9, which averages the luminosity first and then evaluates its feedback expression using a characteristic effective temperature.
+
+No tabulated Figure 9 luminosity or feedback curves are used here.
 """
 
 from pathlib import Path
@@ -34,7 +36,7 @@ def load_hyrec(path, z_min=200.0, z_max=2.0e4):
     return z[mask][order], xe[mask][order], tgas[mask][order]
 
 def vbc_rms(z):
-    return np.minimum(1.0, z / 1.0e3) * 30.0e5
+    return 30.0e5 * np.minimum(1.0, (1.0 + z) / 1.0e3)
 
 def velocity_grid(n=500, xmax=5.0):
     x = np.linspace(0.0, xmax, n)
@@ -64,7 +66,7 @@ def lambda_pbh(mass, z, xe, teff):
     lam_nodrag = lam_ad + (lam_iso - lam_ad) * (gamma**2 / (88.0 + gamma**2))**0.22
     return lam_drag * lam_nodrag / lam_iso
 
-def mdot_pbh(mass, z, xe, teff):
+def Mdot_pbh(mass, z, xe, teff):
     vb = bondi_speed(xe, teff)
     return 9.15e22 * mass**2 * ((1.0 + z) / vb)**3 * lambda_pbh(mass, z, xe, teff)
 
@@ -92,9 +94,10 @@ def free_free_j(x):
     return result
 
 def luminosity(mass, z, xe, teff, branch):
-    mdot = mdot_pbh(mass, z, xe, teff)
-    eps_over_mdot = ts_over_me(mass, z, xe, teff, branch) / MP_OVER_ME / 137.0 * free_free_j(ts_over_me(mass, z, xe, teff, branch))
-    return (mdot / (1.4e17 * mass)) * eps_over_mdot * mdot * 9.0e20
+    Mdot = Mdot_pbh(mass, z, xe, teff)
+    X = ts_over_me(mass, z, xe, teff, branch)
+    eps_over_mdot = X / MP_OVER_ME / 137.0 * free_free_j(X)
+    return (Mdot / (1.4e17 * mass)) * eps_over_mdot * Mdot * 9.0e20
 
 def l_edd(mass):
     return 1.4e17 * mass * 9.0e20
@@ -108,7 +111,7 @@ def feedback_ratio(mass, z, xe, teff, branch):
     return (0.07 * (xe / (1.0 + xe)) * (lum / l_edd(mass)) * (vb / C_LIGHT) 
             * (M_P * C_LIGHT**2 / (K_B * tcmb)) * np.sqrt(1.0 + gamma**(2.0 / 3.0)))
 
-# average over the PBH velocity distribution
+# average the final printed-Eq.-66 diagnostic over relative velocity
 def average_feedback(mass, z, xe, tgas, branch):
     x, weight = velocity_grid()
     vrel = x[:, None] * vbc_rms(z)[None, :]
@@ -116,7 +119,7 @@ def average_feedback(mass, z, xe, tgas, branch):
     feedback = feedback_ratio(mass, z[None, :], xe[None, :], teff, branch)
     return np.trapezoid(weight[:, None] * feedback, x, axis=0)
 
-# plot figure 9
+# plot the independent printed-Eq.-66 velocity average
 def main():
     z, xe, tgas = load_hyrec(HYREC_OUTPUT)
     masses, colors = [1.0, 1.0e2, 1.0e4], ["red", "purple", "blue"]
@@ -137,8 +140,8 @@ def main():
     pos_vals = all_vals[np.isfinite(all_vals) & (all_vals > 0.0)]
     
     ax.set(xlim=(2.0e2, 2.0e4), ylim=(max(1.0e-10, pos_vals.min() / 2.0), pos_vals.max() * 2.0),
-           xlabel=r"Redshift, $z$", ylabel=r"$\langle \max(\dot{T}_{\rm Compt,L}/\dot{T}) \rangle$",
-           title="Thermal-feedback estimate from Eq. (66)")
+           xlabel=r"Redshift, $z$", ylabel=r"$\langle \mathcal{F}_{\rm fb}^{(66)}\rangle_v$",
+           title="Independent velocity average of printed Eq. (66)")
     
     ax.axhline(1.0, color="black", lw=1.0, ls=":", alpha=0.8)
     ax.grid(True, which="major", lw=0.7, alpha=0.30)
@@ -156,7 +159,6 @@ def main():
     ax.legend(handles=branch_handles, loc="upper right", bbox_to_anchor=(1.0, 0.94), frameon=False, fontsize=9)
 
     fig.tight_layout()
-    fig.savefig(Path(__file__).resolve().parent / "figure9_equation66.png", dpi=300, bbox_inches="tight")
     plt.show()
 
 if __name__ == "__main__":
