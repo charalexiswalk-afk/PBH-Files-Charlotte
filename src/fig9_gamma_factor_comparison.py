@@ -2,15 +2,17 @@
 Author: Charlotte Walker
 
 Description:
-This script reconstructs the Figure 9 thermal-feedback calculation from Ali-Haïmoud & Kamionkowski (2017). The luminosity is averaged over the 
-distribution of relative baryon-dark matter velocities and combined with the thermal-feedback prescription used throughout the paper.
+This script reconstructs the Figure 9 thermal-feedback calculation from Ali-Haïmoud & Kamionkowski (2017) and isolates one difference 
+between the printed Eq. (66) and the numerical source implementation.
 
-Equation (66) contains the factor sqrt(1 + gamma^(2/3)), whereas the original HyRec implementation evaluates the corresponding quantity
-using 1 + gamma^(1/3).
+Equation (66) contains the factor sqrt(1 + gamma^(2/3)), whereas the 2017 source uses 1 + gamma^(1/3).
 
-The original HyRec implementation replaces the Eq. (66) expression with the interpolation 1 + gamma^(1/3), which has the same limiting 
-behaviour for small and large gamma. We compare the two prescriptions while keeping every other part of the calculation unchanged 
-in order to isolate the effect of this approximation on the reconstructed Figure 9 curves.
+This script keeps the source luminosity averaging, characteristic effectivetemperature, and numerical feedback prefactor fixed, 
+and changes only this gamma-dependent factor. It therefore shows how much of the difference can be attributed to the gamma factor alone. 
+
+The curve using sqrt(1 + gamma^(2/3)) is not a full literal evaluation of Eq. (66), since the remaining 
+prefactor is still the one used in the numerical source.
+
 """
 
 import io, zipfile
@@ -19,12 +21,10 @@ import matplotlib.pyplot as plt
 import numpy as np
 from matplotlib.lines import Line2D
 
-ZIP_PATH = Path(__file__).resolve().parent / "HyRec_2017.zip"
-PREFIX = "HyRec_2017/"
+HYREC = Path(__file__).resolve().parent / "HyRec_2017"
 
 def load_data(name):
-    with zipfile.ZipFile(ZIP_PATH) as archive:
-        return np.loadtxt(io.BytesIO(archive.read(PREFIX + name)))
+    return np.loadtxt(HYREC / name)
 
 # load HyRec outputs
 feedback_data = load_data("T_feedback.dat")
@@ -88,18 +88,18 @@ def average_luminosity(M, z, xe, Tgas, collisional):
     T = Tgas[None,:] + 1.21e-8 * vrel**2 / (1.0 + xe[None,:])
     return np.sum(weight * L_pbh(M, z[None,:], xe[None,:], T, collisional), axis=0) / np.sum(weight, axis=0)
 
-# thermal-feedback quantity from eq. (66)
+# numerical feedback prefactor used by the 2017 source
 def feedback_prefactor(xe, Teff):
     return np.sqrt(Teff / 1.21e-8) / 3.0e10 * 0.067 * xe / (1.0 + xe) * 1.1e13 / Teff
 
-# compare eq. (66) with the approximation used in HyRec
+# isolate the difference between the printed and source gamma factors
 def feedback_curves(M, collisional):
     Lavg = average_luminosity(M, z, xe, Tgas, collisional)
     gamma = gamma_pbh(M, z, xe, Teff)
     base = Lavg / (1.26e38 * M) * feedback_prefactor(xe, Teff)
-    exact = base * np.sqrt(1.0 + gamma**(2.0 / 3.0))
-    approx = base * (1.0 + gamma**(1.0 / 3.0))
-    return exact, approx, gamma
+    printed_gamma = base * np.sqrt(1.0 + gamma**(2.0 / 3.0))
+    source_gamma = base * (1.0 + gamma**(1.0 / 3.0))
+    return printed_gamma, source_gamma, gamma
 
 fig, ax = plt.subplots(figsize=(8.2, 5.9))
 masses, labels, colors = [1, 1e2, 1e4], [r"$1\,M_\odot$", r"$10^2\,M_\odot$", r"$10^4\,M_\odot$"], ["red", "purple", "blue"]
@@ -107,25 +107,25 @@ masses, labels, colors = [1, 1e2, 1e4], [r"$1\,M_\odot$", r"$10^2\,M_\odot$", r"
 # plot both ionization branches for each PBH mass
 for M, color, label in zip(masses, colors, labels):
     for collisional, ls in ((True, "-"), (False, "--")):
-        exact, approx, gamma = feedback_curves(M, collisional)
-        ax.loglog(z, exact, color=color, ls=ls, lw=2.2, label=label if collisional else None)
-        ax.loglog(z, approx, color=color, ls=ls, lw=1.1, marker="o", ms=2.5, markevery=65, mfc="white")
+        printed_gamma, source_gamma, gamma = feedback_curves(M, collisional)
+        ax.loglog(z, printed_gamma, color=color, ls=ls, lw=2.2, label=label if collisional else None)
+        ax.loglog(z, source_gamma, color=color, ls=ls, lw=1.1, marker="o", ms=2.5, markevery=65, mfc="white")
 
     ratio = (1.0 + gamma**(1.0 / 3.0)) / np.sqrt(1.0 + gamma**(2.0 / 3.0))
-    print(f"M={M:g} M_sun: approximation overestimates by {100 * (ratio.max() - 1):.1f}% at most")
+    print(f"M={M:g} M_sun: source gamma factor is larger by {100 * (ratio.max() - 1):.1f}% at most")
 
 ax.axhline(1.0, color="black", lw=1.0, ls=":")
 ax.set(xlim=(3.0e2, 2.0e4), ylim=(1.0e-8, 1.0e2), xlabel=r"$z$",
        ylabel=r"$\max\!\left(\dot T_{\mathrm{Compt},L}/\dot T\right)$",
-       title="Figure 9 thermal feedback with two $\gamma$ prescriptions")
+       title=r"Figure 9: isolating the $\gamma$-factor difference")
 ax.grid(True, which="both", alpha=0.2)
 
 mass_legend = ax.legend(loc="lower right", frameon=False, title="PBH mass")
 ax.add_artist(mass_legend)
 
 style_handles = [
-    Line2D([0], [0], color="black", lw=2.2, label=r"$\sqrt{1+\gamma^{2/3}}$"),
-    Line2D([0], [0], color="black", lw=1.1, marker="o", mfc="white", label=r"$1+\gamma^{1/3}$"),
+    Line2D([0], [0], color="black", lw=2.2, label=r"source prefactor $\times\sqrt{1+\gamma^{2/3}}$"),
+    Line2D([0], [0], color="black", lw=1.1, marker="o", mfc="white", label=r"source prefactor $\times(1+\gamma^{1/3})$"),
     Line2D([0], [0], color="black", lw=2.2, ls="-", label="Collisional"),
     Line2D([0], [0], color="black", lw=2.2, ls="--", label="Photoionization"),
 ]
